@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>SignIn</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <form id="signin_form" method="POST">
+            {% csrf_token %}
+            <label for="">Username</label>
+            <input type="text" id="username" placeholder="Enter your Username" Required>
+            <br>
+            <label for="">Password</label>
+            <input type="password" id="pass1" placeholder="Enter you Password" Required>
+            <br>
+
+            <button type="submit" id="signin_btn">Sign In</button>
+            <button type="submit" id="forgotpassword">Forgot Password</button>
+        </form>
+        <form id="new_data" method="POST">
+
+        </form>
+        <form id="reset_password_form" method="POST">
+
+        </form>
+        <script>
+                var myInput = document.getElementById("pass1");
+                var letter = document.getElementById("letter");
+                var capital = document.getElementById("capital");
+                var number = document.getElementById("number");
+                var length = document.getElementById("length");
+
+                // When the user clicks on the password field, show the message box
+                myInput.onfocus = function() {
+                document.getElementById("message").style.display = "block";
+                }
+
+                // When the user clicks outside of the password field, hide the message box
+                myInput.onblur = function() {
+                document.getElementById("message").style.display = "none";
+                }
+
+                // When the user starts to type something inside the password field
+                myInput.onkeyup = function() {
+                // Validate lowercase letters
+                var lowerCaseLetters = /[a-z]/g;
+                if(myInput.value.match(lowerCaseLetters)) {
+                    letter.classList.remove("invalid");
+                    letter.classList.add("valid");
+                } else {
+                    letter.classList.remove("valid");
+                    letter.classList.add("invalid");
+                }
+
+                // Validate capital letters
+                var upperCaseLetters = /[A-Z]/g;
+                if(myInput.value.match(upperCaseLetters)) {
+                    capital.classList.remove("invalid");
+                    capital.classList.add("valid");
+                } else {
+                    capital.classList.remove("valid");
+                    capital.classList.add("invalid");
+                }
+
+                // Validate numbers
+                var numbers = /[0-9]/g;
+                if(myInput.value.match(numbers)) {
+                    number.classList.remove("invalid");
+                    number.classList.add("valid");
+                } else {
+                    number.classList.remove("valid");
+                    number.classList.add("invalid");
+                }
+
+                // Validate length
+                if(myInput.value.length >= 8) {
+                    length.classList.remove("invalid");
+                    length.classList.add("valid");
+                } else {
+                    length.classList.remove("valid");
+                    length.classList.add("invalid");
+                }
+                }
+            $("#signin_btn").click(function(event){
+                event.preventDefault();
+                if( $("#username").val().length == 0 ){
+                    alert("please enter username")
+                    return
+                }
+                else if( ($("#pass1").val().length == 0) || ($("#pass1").val().length <= 7)  ){
+                    alert("password must be more than 8 characters")
+                    return
+                }
+                else{
+                    alert("inside else")
+                    $.ajax({
+                    type: "POST",
+                    url: "signin",
+                    data: {
+                        username:$('#username').val(),
+                        password:$('#pass1').val()
+                    },
+                
+                    success: function (result ,status, xhr) {
+                        console.log(result)
+                        console.log("result")
+                        console.log(result.username)
+                        if(result.status==undefined){
+                            console.log("inside first if")
+                            $("#new_data").html(result)
+                            $("#signin_form").hide()
+                            // window.location.assign(result)
+                        }
+                        else if(result.status==true){
+                            alert("successfully logged in")
+                            console.log(result)
+                        }
+                        else if(result.status==false){
+                            alert(result.message)
+                        }
+                    },
+                    error: function(result) {
+                        console.log(result)
+                        alert('error');
+                    }
+                    });
+                }
+            })
+
+            $("#forgotpassword").click(function(event){
+                event.preventDefault();
+                if( $("#username").val().length == 0 ){
+                    alert("please enter username")
+                    return
+                }
+                else{
+                    alert("inside else")
+                    $.ajax({
+                    type: "POST",
+                    url: "forgotpassword_template",
+                    data: {
+                        username:$('#username').val(),
+                    },
+                
+                    success: function (result ,status, xhr) {
+                        console.log(result)
+                        console.log("result")
+                        console.log(result.username)
+                        $("#reset_password_form").html(result)
+                        $("#reset_password_form").show()
+                        $("#new_data").hide()
+                        $("#signin_form").hide()
+                    },
+                    error: function(result) {
+                        console.log(result)
+                        alert('error');
+                        $("#reset_password_form").hide()
+                        $("#new_data").hide()
+                        $("#signin_form").show()
+                    }
+                    });
+                }
+            })
+        </script>
+    </body>
+</html>
